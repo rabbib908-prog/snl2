@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1565d8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SNL Chats">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>SNL Chats</title>
+<style>
+:root{--p:#1565d8;--on:#fff;--bg:#f2f6fc;--chat:#e8f0fb;--out:#d4e6ff;--in:#fff;--text:#13203a;--muted:#6b7a90;--line:#e2e9f3;--surf:#fff;--tick:#1e88ff;--red:#e53935;--r:14px;--anim:pop}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali",sans-serif;display:flex;justify-content:center;overflow:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);transition:background .4s}
+button{font:inherit;cursor:pointer;border:0;transition:transform .12s,background .2s}
+button:active{transform:scale(.92)}
+input{font:inherit;color:var(--text);outline:0}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.scr,#app{width:100%;max-width:480px;height:100%;background:var(--surf);position:relative;overflow:hidden;box-shadow:0 0 30px rgba(0,0,0,.1)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .32s cubic-bezier(.4,0,.2,1);background:var(--surf)}
+#chat{transform:translateX(100%);background:var(--chat)}
+#app.open #chat{transform:none}#app.open #list{transform:translateX(-28%)}
+.av{display:inline-grid;border-radius:50%;overflow:hidden;background:rgba(127,127,127,.13);flex-shrink:0}.av svg{width:100%;height:100%}
+header{background:var(--p);color:var(--on);padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:2;transition:background .4s}
+header h1{font-size:20px;flex:1}header h1 span{opacity:.7;font-weight:400}
+.ib{background:none;color:inherit;padding:7px;border-radius:50%;display:inline-grid;place-items:center}.ib:active{background:rgba(127,127,127,.25)}
+.hn{flex:1;min-width:0;line-height:1.2}.hn b{display:block}.hn small{opacity:.85;font-size:12px}
+/* auth */
+#auth{display:grid;place-items:center;padding:20px;overflow-y:auto}
+.ac{width:100%;display:flex;flex-direction:column;gap:10px}
+.hero{align-self:center;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(3deg)}}
+.ac h1{text-align:center;font-size:30px;color:var(--p)}.ac h1 span{color:var(--muted);font-weight:400}
+.tabs{display:flex;background:var(--bg);border-radius:12px;padding:3px}.tabs button{flex:1;padding:9px;border-radius:10px;background:none;color:var(--muted)}.tabs .on{background:var(--surf);color:var(--p);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.ac input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.ac input:focus{border-color:var(--p)}
+#pk{width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;background:var(--bg);border:1px solid var(--line);text-align:left;color:var(--text)}
+#pk span{flex:1}.ch{width:9px;height:9px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(45deg);transition:transform .25s}.open .ch{transform:rotate(-135deg)}
+#al{max-height:0;overflow:hidden;transition:max-height .35s;border-radius:12px;background:var(--surf)}
+.open #al{max-height:420px;overflow-y:auto;border:1px solid var(--line);margin-top:6px}
+.opt{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--line)}.opt:active{background:var(--bg)}
+.opt small{color:var(--muted);margin-left:auto}
+#er{min-height:20px;color:var(--red);font-size:14px;text-align:center}#er.ok{color:#2e7d32}
+.lnk{background:none;color:var(--p);padding:6px;font-size:14px;align-self:center}
+.go{width:100%;padding:14px;border-radius:12px;background:var(--p);color:var(--on);font-weight:600;font-size:16px}
+/* list */
+.search{padding:8px 12px;border-bottom:1px solid var(--line)}.search input{width:100%;padding:9px 14px;border-radius:20px;border:0;background:var(--bg)}
+#rows{flex:1;overflow-y:auto}
+.row{display:flex;gap:12px;padding:12px 14px;align-items:center;border-bottom:1px solid var(--line);cursor:pointer;animation:pop .3s both}.row:active{background:var(--bg)}
+.mid{flex:1;min-width:0}.top,.prev{display:flex;justify-content:space-between;gap:8px}.name{font-weight:600}.name small{color:var(--muted);font-weight:400}.time{font-size:12px;color:var(--muted)}
+.prev{color:var(--muted);font-size:14px}.prev p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{background:var(--p);color:var(--on);border-radius:10px;font-size:12px;min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;font-weight:600}
+.note{color:var(--muted);font-size:14px;margin:8px 0 12px}
+.empty{padding:36px 20px;text-align:center;color:var(--muted)}
+.fab{position:absolute;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:18px;background:var(--p);color:var(--on);display:grid;place-items:center;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+/* chat */
+#msgs{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:3px;scroll-behavior:smooth}
+body[data-k=cow] #msgs{background-image:radial-gradient(ellipse 60px 40px at 15% 20%,#0002 98%,#0000),radial-gradient(ellipse 80px 50px at 80% 45%,#0002 98%,#0000),radial-gradient(ellipse 50px 70px at 30% 80%,#0002 98%,#0000);background-attachment:local}
+.day{align-self:center;background:var(--surf);color:var(--muted);font-size:12px;padding:3px 12px;border-radius:10px;margin:6px 0}
+.m{max-width:80%;padding:6px 9px 4px;border-radius:var(--r);background:var(--in);box-shadow:0 1px 1px rgba(0,0,0,.1);word-wrap:break-word;cursor:pointer;animation:var(--anim) .4s}
+.m.me{align-self:flex-end;background:var(--out);border-bottom-right-radius:4px}.m.them{align-self:flex-start;border-bottom-left-radius:4px}
+.m.del{opacity:.6;font-style:italic;color:var(--muted)}
+.t{font-size:11px;color:var(--muted);display:flex;gap:3px;justify-content:flex-end}.tk{display:inline-flex}.tk .i{width:16px;height:16px;stroke-width:2.2}.tk.read{color:var(--tick)}
+.q{border-left:3px solid var(--p);background:rgba(127,127,127,.12);border-radius:6px;padding:3px 8px;margin-bottom:4px;font-size:13px}.q b{display:block;color:var(--p);font-size:12px}.q span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.pic{display:block;max-width:100%;min-width:140px;min-height:100px;max-height:260px;border-radius:10px;margin-bottom:3px;background:rgba(127,127,127,.2)}
+.file{display:flex;align-items:center;gap:10px;min-width:200px;padding:4px 2px}.fi{width:40px;height:44px;border-radius:8px;background:var(--p);color:var(--on);display:grid;place-items:center;font-size:11px;font-weight:700}.file b{display:block;font-size:14px;word-break:break-all}.file small{color:var(--muted)}
+.vn{display:flex;align-items:center;gap:8px;min-width:220px}.pl{width:36px;height:36px;border-radius:50%;background:var(--p);color:var(--on);display:grid;place-items:center}.pl .i{width:16px;height:16px}
+.wv{flex:1;display:flex;align-items:center;gap:2px;height:30px}.wv i{flex:1;background:var(--muted);opacity:.45;border-radius:2px;min-height:3px}.wv i.on{background:var(--p);opacity:1}.du{font-size:12px;color:var(--muted);min-width:34px}
+#rp{background:var(--surf);padding:0 10px;max-height:0;overflow:hidden;transition:.22s;display:flex;align-items:center;gap:8px}#rp.show{max-height:60px;padding:8px 10px}#rp .q{flex:1;min-width:0;margin:0}
+.bar{display:flex;gap:6px;padding:8px;background:var(--surf);border-top:1px solid var(--line);align-items:center}.bar .ib{color:var(--muted)}.bar .ib .i{width:22px;height:22px}
+.bar input{flex:1;min-width:0;padding:11px 16px;border-radius:22px;border:0;background:var(--bg)}
+.send,.mic{width:44px;height:44px;border-radius:50%;background:var(--p);color:var(--on);display:grid;place-items:center;flex-shrink:0}
+.bar .send{display:none}.bar.has .send{display:grid}.bar.has .mic{display:none}
+.recui{display:none;flex:1;align-items:center;gap:10px}.bar.rec>*:not(.recui){display:none}.bar.rec .recui{display:flex}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--red);animation:blink 1s infinite}@keyframes blink{50%{opacity:.2}}
+#rt{flex:1;color:var(--red);font-weight:600}.cancel{background:none;color:var(--muted);padding:8px}
+/* sheet, lightbox, toast */
+#sheet{position:absolute;inset:0;z-index:10;pointer-events:none}#sheet .bk{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .25s}
+#sheet .pane{position:absolute;left:0;right:0;bottom:0;max-height:80%;overflow-y:auto;background:var(--surf);border-radius:20px 20px 0 0;padding:16px;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.9,.3,1)}
+#sheet.show{pointer-events:auto}#sheet.show .bk{opacity:1}#sheet.show .pane{transform:none}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:center}.grid button,.act{background:var(--bg);color:var(--text);border-radius:14px;padding:14px 4px}
+.grid button .i{width:26px;height:26px;color:var(--p);display:block;margin:0 auto 4px}
+.act{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px;margin-bottom:6px}.act.red{color:var(--red)}
+.field{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);margin:8px 0}
+#lb{position:absolute;inset:0;z-index:20;background:rgba(0,0,0,.92);display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .25s}#lb.show{opacity:1;pointer-events:auto}#lb img{max-width:96%;max-height:90%}
+#toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:#13203a;color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:30}#toast.show{opacity:1;transform:translate(-50%,0)}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+@keyframes bounce{0%{transform:translateY(20px) scale(.8);opacity:0}60%{transform:translateY(-6px)}}
+@keyframes float{from{transform:translateY(14px);opacity:0}}
+@keyframes snap{0%{transform:scaleX(.4);opacity:0}60%{transform:scaleX(1.08)}}
+@keyframes thud{0%{transform:translateY(-30px);opacity:0}60%{transform:none}72%{transform:translateX(-4px)}86%{transform:translateX(3px)}}
+@keyframes scoot{from{transform:translateX(60px) skewX(-12deg);opacity:0}}
+@keyframes ram{0%{transform:translateX(50px);opacity:0}70%{transform:translateX(-8px)}}
+@keyframes swing{0%{transform:rotate(-8deg) translateY(-14px);opacity:0;transform-origin:top right}60%{transform:rotate(4deg)}}
+</style>
+</head>
+<body>
+<section class="scr" id="auth"><div class="ac">
+  <div class="hero" id="hero"></div>
+  <h1>SNL <span>Chats</span></h1>
+  <div class="tabs"><button id="tin" class="on">লগইন</button><button id="tup">সাইন-আপ</button></div>
+  <div id="upf" hidden style="display:flex;flex-direction:column;gap:10px">
+    <input id="nm" placeholder="আপনার নাম" maxlength="40" autocomplete="name">
+    <div id="pick"><button type="button" id="pk"><span id="pkv">আপনার পশু বেছে নিন</span><i class="ch"></i></button><div id="al"></div></div>
+    <input id="cu" placeholder="পশুর নাম লিখুন (বাঘ, owl, ইলিশ…)" maxlength="30" hidden>
+  </div>
+  <input id="em" type="email" placeholder="ইমেইল" autocomplete="email">
+  <input id="pw" type="password" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)" autocomplete="current-password" hidden>
+  <input id="cd" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="ইমেইলে আসা কোড" hidden style="text-align:center;letter-spacing:6px;font-size:20px">
+  <p id="er"></p>
+  <button class="go" id="go">কোড পাঠান</button>
+  <button type="button" class="lnk" id="vm"></button>
+</div></section>
+<div id="app" hidden>
+  <section class="screen" id="list">
+    <header><span id="me"></span><h1>SNL <span>Chats</span></h1><button class="ib" id="bell" aria-label="নোটিফিকেশন ও ইনস্টল"></button><button class="ib" id="out" aria-label="লগআউট"></button></header>
+    <div class="search"><input id="q" placeholder="চ্যাট খুঁজুন" autocomplete="off"></div>
+    <div id="rows"></div>
+    <button class="fab" id="newc" aria-label="নতুন চ্যাট"></button>
+  </section>
+  <section class="screen" id="chat">
+    <header><button class="ib" id="back" aria-label="ফিরে যান"></button><span id="cav"></span><div class="hn"><b id="cn"></b><small id="cs"></small></div></header>
+    <div id="msgs"></div>
+    <div id="rp"><div class="q"><b id="rpn"></b><span id="rpt"></span></div><button class="ib" id="rpx" aria-label="বাতিল"></button></div>
+    <div class="bar" id="bar">
+      <button class="ib" id="att" aria-label="ফাইল"></button>
+      <input id="in" placeholder="মেসেজ লিখুন" autocomplete="off">
+      <button class="mic" id="mic" aria-label="ভয়েস নোট"></button>
+      <button class="send" id="send" aria-label="পাঠান"></button>
+      <div class="recui"><button class="cancel" id="rc">বাতিল</button><span class="dot"></span><span id="rt">0:00</span><button class="send" style="display:grid" id="rs" aria-label="ভয়েস পাঠান"></button></div>
+    </div>
+  </section>
+  <div id="sheet"><div class="bk"></div><div class="pane"></div></div>
+  <div id="lb"><img alt=""></div>
+</div>
+<div id="toast"></div>
+<input type="file" id="fph" accept="image/*" hidden><input type="file" id="fdoc" hidden>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SBU='https://cnmuuhghhzppnujijcgf.supabase.co',SBK='sb_publishable_X8vcx4fx-2lkQd3TeQdGwQ_j1DAiMJh';
+const sb=supabase.createClient(SBU,SBK);
+const $=s=>document.querySelector(s),E=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const IC={pen:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',back:'<path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>',x:'<path d="M18 6L6 18M6 6l12 12"/>',clip:'<path d="M21.4 11l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/>',send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',play:'<polygon points="7 4 20 12 7 20" fill="currentColor"/>',pause:'<rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>',check:'<path d="M20 6L9 17l-5-5"/>',checks:'<path d="M1 13l4.5 4.5L15 8"/><path d="M10.5 16.5l1 1L21 8"/>',image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',reply:'<path d="M9 14L4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>',trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',ban:'<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/>',bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',down:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+document.querySelectorAll('[id]').forEach(e=>{const m={out:'out',bell:'bell',newc:'pen',back:'back',rpx:'x',att:'clip',mic:'mic',send:'send',rs:'send'}[e.id];if(m)e.innerHTML=ic(m)});
+/* animals */
+const AN=[['সান্ডা','Sanda','sanda'],['গন্ডার','Rhino','rhino'],['পাঠা','Goat','goat'],['টিকটিকি','Lizard','lizard'],['সাদা হাতি','White Elephant','elephant'],['কুমির','Crocodile','croc'],['পান্ডা','Panda','panda'],['গরু','Cow','cow'],['বানর','Monkey','monkey']];
+const KEY={};AN.forEach(a=>{KEY[a[0]]=a[2];KEY[a[1].toLowerCase()]=a[2]});
+Object.assign(KEY,{'গণ্ডার':'rhino','rhinoceros':'rhino','ছাগল':'goat','খাসি':'goat','হাতি':'elephant','elephant':'elephant','gecko':'lizard','alligator':'croc','হনুমান':'monkey','ape':'monkey','ষাঁড়':'cow','bull':'cow'});
+const norm=t=>(t||'').trim().replace(/\s+/g,' ').toLowerCase(),akey=n=>KEY[norm(n)]||'x';
+const hue=n=>{let h=0;for(const c of norm(n))h=(h*31+c.charCodeAt(0))%360;return h};
+/* theme: [primary,on,bg,chat,out,radius,animation] */
+const TH={panda:['#2e3b32','#fff','#f3f6f0','#e6eee2','#cfe8c4',18,'bounce'],elephant:['#7b8ea3','#fff','#eef2f6','#e4eaf1','#dbe4ee',20,'float'],croc:['#2e7d32','#fff','#e8f3e5','#d6e9d1','#b9dfb0',4,'snap'],rhino:['#546e7a','#fff','#e9eef0','#dbe3e6','#c5d3d8',6,'thud'],lizard:['#7cb518','#12220a','#f2f9e4','#e5f2c8','#d4eca0',16,'scoot'],sanda:['#c77d2e','#fff','#faf0e0','#f3e2c6','#f0d3a2',12,'pop'],goat:['#8d6e63','#fff','#f7f1ec','#efe4db','#e6d3c5',14,'ram'],cow:['#37474f','#fff','#fafafa','#f4f4f4','#e1e6e9',16,'pop'],monkey:['#f9a825','#3e2723','#fff9e6','#fff3cc','#ffe082',20,'swing']};
+const VAR=['--p','--on','--bg','--chat','--out','--r','--anim'];
+function theme(n){const k=akey(n);let t=TH[k];if(!n)return resetTheme();if(!t){const h=hue(n);t=[`hsl(${h} 55% 38%)`,'#fff',`hsl(${h} 45% 96%)`,`hsl(${h} 40% 92%)`,`hsl(${h} 60% 86%)`,14,'pop']}
+ VAR.forEach((v,i)=>document.documentElement.style.setProperty(v,i==5?t[5]+'px':t[i]));document.body.dataset.k=k}
+function resetTheme(){VAR.forEach(v=>document.documentElement.style.removeProperty(v));document.body.dataset.k=''}
+const AVS={panda:'<circle cx="10" cy="10" r="7" fill="#222"/><circle cx="38" cy="10" r="7" fill="#222"/><circle cx="24" cy="26" r="18" fill="#fff" stroke="#ddd"/><ellipse cx="16" cy="24" rx="5" ry="6.5" fill="#222" transform="rotate(20 16 24)"/><ellipse cx="32" cy="24" rx="5" ry="6.5" fill="#222" transform="rotate(-20 32 24)"/><circle cx="16.5" cy="24" r="1.8" fill="#fff"/><circle cx="31.5" cy="24" r="1.8" fill="#fff"/><ellipse cx="24" cy="32" rx="3.5" ry="2.5" fill="#222"/>',
+elephant:'<circle cx="8" cy="22" r="9" fill="#b0bec5"/><circle cx="40" cy="22" r="9" fill="#b0bec5"/><circle cx="24" cy="22" r="15" fill="#eceff1"/><path d="M20 28h8v10c0 5-8 5-8 1z" fill="#cfd8dc"/><circle cx="18" cy="21" r="2" fill="#37474f"/><circle cx="30" cy="21" r="2" fill="#37474f"/>',
+croc:'<rect x="4" y="16" width="40" height="22" rx="10" fill="#43a047"/><circle cx="14" cy="14" r="6" fill="#66bb6a"/><circle cx="34" cy="14" r="6" fill="#66bb6a"/><circle cx="14" cy="13" r="2.5" fill="#fff"/><circle cx="34" cy="13" r="2.5" fill="#fff"/><circle cx="14" cy="13" r="1.2" fill="#111"/><circle cx="34" cy="13" r="1.2" fill="#111"/><circle cx="20" cy="22" r="1.2" fill="#1b5e20"/><circle cx="28" cy="22" r="1.2" fill="#1b5e20"/><path d="M8 32l3 4 3-4 3 4 3-4 3 4 3-4 3 4 3-4 3 4 3-4" fill="none" stroke="#fff" stroke-width="2"/>',
+rhino:'<path d="M4 18l8-8 6 8zM44 18l-8-8-6 8z" fill="#78909c"/><rect x="7" y="14" width="34" height="30" rx="14" fill="#90a4ae"/><path d="M24 6l-4 16h8z" fill="#eceff1" stroke="#b0bec5"/><circle cx="16" cy="28" r="2.2" fill="#263238"/><circle cx="32" cy="28" r="2.2" fill="#263238"/><ellipse cx="24" cy="38" rx="9" ry="4" fill="#b0bec5"/>',
+lizard:'<ellipse cx="24" cy="26" rx="19" ry="15" fill="#8bc34a"/><circle cx="15" cy="17" r="5" fill="#aed581"/><circle cx="33" cy="17" r="5" fill="#aed581"/><circle cx="15" cy="17" r="2.2" fill="#222"/><circle cx="33" cy="17" r="2.2" fill="#222"/><path d="M16 30q8 6 16 0" fill="none" stroke="#33691e" stroke-width="2" stroke-linecap="round"/><path d="M24 33v7M24 40l-2 3M24 40l2 3" stroke="#e53935" stroke-width="1.6" fill="none"/>',
+sanda:'<path d="M8 28L12 12l6 10 6-14 6 14 6-10 4 16z" fill="#a1672a"/><ellipse cx="24" cy="30" rx="18" ry="13" fill="#e0a85b"/><circle cx="16" cy="26" r="2.4" fill="#3e2723"/><circle cx="32" cy="26" r="2.4" fill="#3e2723"/><path d="M17 35q7 4 14 0" fill="none" stroke="#6d4c20" stroke-width="2" stroke-linecap="round"/>',
+goat:'<path d="M12 18C4 12 6 4 12 4c0 6 4 8 6 10zM36 18c8-6 6-14 0-14 0 6-4 8-6 10z" fill="#d7ccc8" stroke="#8d6e63" stroke-width="1.5"/><ellipse cx="24" cy="26" rx="14" ry="16" fill="#bcaaa4"/><circle cx="18" cy="23" r="2.2" fill="#222"/><circle cx="30" cy="23" r="2.2" fill="#222"/><ellipse cx="24" cy="34" rx="7" ry="5" fill="#efebe9"/><path d="M24 39v7" stroke="#efebe9" stroke-width="4" stroke-linecap="round"/>',
+cow:'<path d="M9 14L5 6h8zM39 14l4-8h-8z" fill="#fff" stroke="#999"/><ellipse cx="7" cy="20" rx="6" ry="4" fill="#fff" stroke="#999"/><ellipse cx="41" cy="20" rx="6" ry="4" fill="#fff" stroke="#999"/><rect x="9" y="10" width="30" height="34" rx="13" fill="#fff" stroke="#999"/><path d="M9 20c0-8 8-10 12-9-2 5-2 9-12 9z" fill="#333"/><circle cx="18" cy="24" r="2.2" fill="#222"/><circle cx="30" cy="24" r="2.2" fill="#222"/><ellipse cx="24" cy="36" rx="9" ry="6" fill="#f8bbd0"/><circle cx="21" cy="36" r="1.4" fill="#ad1457"/><circle cx="27" cy="36" r="1.4" fill="#ad1457"/>',
+monkey:'<circle cx="6" cy="26" r="6" fill="#8d6e63"/><circle cx="42" cy="26" r="6" fill="#8d6e63"/><circle cx="24" cy="24" r="18" fill="#a1887f"/><circle cx="24" cy="29" r="11" fill="#ffe0b2"/><circle cx="18" cy="22" r="2.2" fill="#222"/><circle cx="30" cy="22" r="2.2" fill="#222"/><path d="M19 32q5 4 10 0" fill="none" stroke="#6d4c41" stroke-width="2" stroke-linecap="round"/>'};
+const PAW='<circle cx="24" cy="24" r="22" fill="currentColor" opacity=".15"/><ellipse cx="24" cy="31" rx="9" ry="7" fill="currentColor"/><circle cx="13" cy="22" r="3.5" fill="currentColor"/><circle cx="20" cy="15" r="3.5" fill="currentColor"/><circle cx="28" cy="15" r="3.5" fill="currentColor"/><circle cx="35" cy="22" r="3.5" fill="currentColor"/>';
+const av=(n,s=40)=>`<span class="av" style="width:${s}px;height:${s}px;color:hsl(${hue(n)} 55% 38%)"><svg viewBox="0 0 48 48">${AVS[akey(n)]||PAW}</svg></span>`;
+/* helpers */
+const tm=d=>new Date(d).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const sz=b=>!b?'':b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB';
+const when=d=>{const x=new Date(d);return x.toDateString()===new Date().toDateString()?tm(d):x.toLocaleDateString([],{day:'numeric',month:'short'})};
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2400)}
+function sheet(h){const s=$('#sheet');if(h===null)return s.classList.remove('show');s.querySelector('.pane').innerHTML=h;s.classList.add('show')}
+let me=null,prof=null,CH=[],cur=null,msgs=new Map(),rp=null,aud=null,aid=null,rec=null,mode='in',sel=null,started=false,soon=null;
+/* auth */
+function hero(){$('#hero').innerHTML=av(sel==='custom'?$('#cu').value:sel||'',92)}
+$('#al').innerHTML=AN.map(a=>`<div class="opt" data-k="${a[0]}">${av(a[0],34)}<b>${a[0]}</b><small>${a[1]}</small></div>`).join('')+`<div class="opt" data-k="custom">${av('',34)}<b>অন্য পশু (Custom)</b></div>`;
+$('#al').onclick=e=>{const o=e.target.closest('.opt');if(!o)return;sel=o.dataset.k;$('#pick').classList.remove('open');$('#cu').hidden=sel!=='custom';
+ $('#pkv').textContent=sel==='custom'?'অন্য পশু (Custom)':sel;theme(sel==='custom'?'':sel);hero();if(sel==='custom')$('#cu').focus()};
+$('#pk').onclick=()=>$('#pick').classList.toggle('open');
+$('#cu').oninput=e=>{theme(e.target.value.trim());hero()};
+function setMode(m){mode=m;$('#upf').hidden=m==='in';$('#tin').classList.toggle('on',m==='in');$('#tup').classList.toggle('on',m==='up');sent=false;viaUI();err('');if(m==='in'){resetTheme();sel=null}hero()}
+$('#tin').onclick=()=>setMode('in');$('#tup').onclick=()=>setMode('up');
+function err(t,ok){const e=$('#er');e.textContent=t;e.className=ok?'ok':''}
+let via='otp',sent=false;
+function viaUI(){const o=via==='otp';$('#pw').hidden=o;$('#cd').hidden=!sent;$('#em').disabled=sent;$('#vm').textContent=o?'পাসওয়ার্ড দিয়ে লগইন করুন':'কোড (OTP) দিয়ে লগইন করুন';
+ $('#go').textContent=sent?'কোড যাচাই করুন':o?'কোড পাঠান':mode==='in'?'লগইন':'সাইন-আপ করুন'}
+$('#vm').onclick=()=>{via=via==='otp'?'pw':'otp';sent=false;$('#cd').value='';err('');viaUI()};
+$('#go').onclick=async()=>{
+ const email=$('#em').value.trim();if(!email)return err('ইমেইল দিন');
+ $('#go').disabled=true;err('');
+ try{
+  if(sent){const{error}=await sb.auth.verifyOtp({email,token:$('#cd').value.trim(),type:'email'});if(error)err('কোডটি ভুল বা মেয়াদ শেষ');return}
+  let name=null,animal=null;
+  if(mode==='up'){
+   name=$('#nm').value.trim();animal=sel==='custom'?$('#cu').value.trim():sel;
+   if(!name)return err('আপনার নাম লিখুন');if(!animal)return err('একটি পশু বেছে নেওয়া বাধ্যতামূলক');
+   const{data:ok}=await sb.rpc('is_animal',{t:animal});if(!ok)return err('হা হা, এটা তো পশুর নাম না! আবার চেষ্টা করুন');
+  }
+  if(via==='otp'){
+   const{error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:mode==='up',data:mode==='up'?{name,animal}:undefined}});
+   if(error)return err(/database|animal/i.test(error.message)?'পশুর নাম ঠিক নয়':/not found|signups/i.test(error.message)?'এই ইমেইলে কোনো একাউন্ট নেই, সাইন-আপ করুন':error.message);
+   sent=true;viaUI();err('ইমেইলে কোড পাঠানো হয়েছে',1);$('#cd').focus();return}
+  const pw=$('#pw').value;if(!pw)return err('পাসওয়ার্ড দিন');
+  if(mode==='up'){
+   const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{name,animal}}});
+   if(error)return err(/database|animal/i.test(error.message)?'পশুর নাম ঠিক নয়':error.message);
+   if(!data.session)err('ইমেইলে কনফার্মেশন পাঠানো হয়েছে। কনফার্ম করে লগইন করুন',1);
+  }else{const{error}=await sb.auth.signInWithPassword({email,password:pw});if(error)err('ইমেইল বা পাসওয়ার্ড ভুল')}
+ }finally{$('#go').disabled=false}};
+sb.auth.onAuthStateChange((_e,s)=>setTimeout(()=>s?start(s.user):stop(),0));
+async function start(u){if(started)return;started=true;me=u;
+ const{data}=await sb.from('profiles').select('*').eq('id',u.id).single();if(!data){started=false;return sb.auth.signOut()}
+ prof=data;theme(prof.animal);$('#me').innerHTML=av(prof.animal,36);$('#auth').hidden=true;$('#app').hidden=false;await loadChats();rt();resub();const pc=new URLSearchParams(location.search).get('chat');if(pc){history.replaceState(null,'',location.pathname);open(pc)}}
+function stop(){started=false;me=prof=cur=null;CH=[];sb.removeAllChannels();$('#app').hidden=true;$('#app').classList.remove('open');$('#auth').hidden=false;setMode('in')}
+$('#out').onclick=async()=>{try{const r=await navigator.serviceWorker.ready,x=await r.pushManager.getSubscription();if(x)await sb.rpc('drop_push',{e:x.endpoint})}catch(_){}sb.auth.signOut()};
+/* push + install */
+const VAPID='BOxBhbiY8Dhkp5ADel6WJCP2RD7bK5U-qMWnIDsI-mAS__gEpedEBX3y2A2HN4y7kJsONXfcjKf_arWCvv6MC7Q';
+const u8=b=>Uint8Array.from(atob((b+'='.repeat((4-b.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+let ipr=null;const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+const canPush=()=>'serviceWorker' in navigator&&'Notification' in window&&'PushManager' in window;
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.open&&me)loadChats().then(()=>open(e.data.open))})}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ipr=e});
+async function resub(){try{if(canPush()&&Notification.permission==='granted'){const r=await navigator.serviceWorker.ready,x=await r.pushManager.getSubscription();if(x){const j=x.toJSON();await sb.rpc('save_push',{e:j.endpoint,p:j.keys.p256dh,a:j.keys.auth})}}}catch(_){}}
+async function push(a){
+ if(a==='inst'&&ipr){ipr.prompt();ipr=null;return}
+ const r=await navigator.serviceWorker.ready;
+ if(a==='off'){const x=await r.pushManager.getSubscription();if(x){await sb.rpc('drop_push',{e:x.endpoint});await x.unsubscribe()}return toast('নোটিফিকেশন বন্ধ হয়েছে')}
+ if(a==='on'){if(await Notification.requestPermission()!=='granted')return toast('নোটিফিকেশনের অনুমতি দেওয়া হয়নি');
+  try{const x=await r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)}),j=x.toJSON(),{error}=await sb.rpc('save_push',{e:j.endpoint,p:j.keys.p256dh,a:j.keys.auth});if(error)throw error;toast('নোটিফিকেশন চালু হয়েছে')}catch(_){toast('চালু করা যায়নি')}}}
+$('#bell').onclick=async()=>{
+ let h='<b>নোটিফিকেশন ও অ্যাপ</b>',x=null;
+ if(canPush()){try{x=await(await navigator.serviceWorker.ready).pushManager.getSubscription()}catch(_){}}
+ if(!standalone())h+=ipr?`<button class="act" data-p="inst">${ic('down')}হোমস্ক্রিনে অ্যাপ যোগ করুন</button>`:ios?'<p class="note">iPhone-এ: Safari-র শেয়ার বোতাম চেপে "Add to Home Screen" বেছে নিন, তারপর হোমস্ক্রিনের আইকন থেকে অ্যাপ খুলে এখানে এসে নোটিফিকেশন চালু করুন।</p>':'<p class="note">ব্রাউজারের মেনু থেকে "Install app" বা "Add to Home screen" বেছে নিন।</p>';
+ h+=!canPush()||(ios&&!standalone())?'<p class="note">এই ব্রাউজারে নোটিফিকেশন চলবে না'+(ios&&!standalone()?' (আগে হোমস্ক্রিনে যোগ করুন)':'')+'।</p>':x?`<button class="act red" data-p="off">${ic('bell')}নোটিফিকেশন বন্ধ করুন</button>`:`<button class="act" data-p="on">${ic('bell')}নোটিফিকেশন চালু করুন</button>`;
+ sheet(h)};
+/* chat list */
+async function loadChats(){
+ const{data:mem}=await sb.from('chat_members').select('chat_id,last_read_at').eq('user_id',me.id),ids=(mem||[]).map(m=>m.chat_id);
+ if(!ids.length){CH=[];return rows()}
+ const[{data:oth},{data:ms}]=await Promise.all([
+  sb.from('chat_members').select('chat_id,last_read_at,profiles(id,name,animal)').in('chat_id',ids).neq('user_id',me.id),
+  sb.from('messages').select('id,chat_id,sender_id,kind,body,file_name,duration,deleted,created_at').in('chat_id',ids).order('created_at',{ascending:false}).limit(300)]);
+ CH=ids.map(id=>{const o=(oth||[]).find(x=>x.chat_id===id),mine=mem.find(x=>x.chat_id===id),l=(ms||[]).filter(m=>m.chat_id===id);
+  return{id,who:o&&o.profiles,theirRead:o&&o.last_read_at,last:l[0],unread:l.filter(m=>m.sender_id!==me.id&&new Date(m.created_at)>new Date(mine.last_read_at)).length}})
+  .sort((a,b)=>new Date(b.last?b.last.created_at:0)-new Date(a.last?a.last.created_at:0));
+ if(cur){const c=CH.find(x=>x.id===cur.id);if(c)cur.theirRead=c.theirRead}
+ rows()}
+const soonLoad=()=>{clearTimeout(soon);soon=setTimeout(loadChats,300)};
+const pv=m=>m.deleted?'মেসেজ মুছে ফেলা হয়েছে':m.kind==='image'?'ছবি':m.kind==='file'?(m.file_name||'ফাইল'):m.kind==='voice'?'ভয়েস নোট '+fmt(m.duration||0):(m.body||'');
+function rows(){
+ const q=$('#q').value.toLowerCase(),l=CH.filter(c=>!q||(c.who&&c.who.name.toLowerCase().includes(q)));
+ $('#rows').innerHTML=l.map((c,i)=>{const w=c.who||{name:'?',animal:''},m=c.last;
+  return `<div class="row" data-id="${c.id}" style="animation-delay:${i*40}ms">${av(w.animal,46)}<div class="mid"><div class="top"><span class="name">${E(w.name)} <small>${E(w.animal)}</small></span><span class="time">${m?when(m.created_at):''}</span></div><div class="prev"><p>${m?(m.sender_id===me.id?'আপনি: ':'')+E(pv(m)):'এখনও কোনো মেসেজ নেই'}</p>${c.unread?`<span class="badge">${c.unread}</span>`:''}</div></div></div>`}).join('')||'<div class="empty">কোনো চ্যাট নেই। নিচের পেন্সিল বোতাম চেপে বন্ধুকে খুঁজুন।</div>'}
+$('#q').oninput=rows;$('#rows').onclick=e=>{const r=e.target.closest('.row');if(r)open(r.dataset.id)};
+$('#newc').onclick=async()=>{
+ const{data}=await sb.from('profiles').select('id,name,animal').neq('id',me.id).order('name').limit(300);
+ const draw=q=>(data||[]).filter(p=>p.name.toLowerCase().includes(q)).map(p=>`<div class="opt" data-u="${p.id}">${av(p.animal,40)}<b>${E(p.name)}</b><small>${E(p.animal)}</small></div>`).join('')||'<div class="empty">কেউ পাওয়া যায়নি</div>';
+ sheet(`<b>নতুন চ্যাট</b><input class="field" id="sq" placeholder="নাম খুঁজুন"><div id="ul">${draw('')}</div>`);
+ $('#sq').oninput=e=>$('#ul').innerHTML=draw(e.target.value.toLowerCase());
+ $('#ul').onclick=async e=>{const o=e.target.closest('[data-u]');if(!o)return;const{data:id,error}=await sb.rpc('start_direct_chat',{other:o.dataset.u});sheet(null);if(error)return toast('চ্যাট শুরু করা যায়নি');await loadChats();open(id)}};
+/* conversation */
+const nm=()=>cur&&cur.who?cur.who.name:'';
+const rd=m=>cur&&cur.theirRead&&new Date(cur.theirRead)>=new Date(m.created_at);
+const tk=m=>m.sender_id===me.id&&!m.deleted?`<span class="tk ${rd(m)?'read':''}">${ic(rd(m)?'checks':'check')}</span>`:'';
+function body(m){
+ if(m.deleted)return ic('ban')+' মেসেজটি মুছে ফেলা হয়েছে';
+ const r=m.reply_to&&msgs.get(m.reply_to),q=r?`<div class="q"><b>${E(r.sender_id===me.id?'আপনি':nm())}</b><span>${E(pv(r))}</span></div>`:'';
+ if(m.kind==='image')return q+`<img class="pic" data-path="${E(m.file_path)}" alt="ছবি">`;
+ if(m.kind==='file')return q+`<div class="file" data-path="${E(m.file_path)}"><div class="fi">${E((m.file_name||'').split('.').pop().slice(0,4).toUpperCase())}</div><div><b>${E(m.file_name)}</b><small>${sz(m.file_size)}</small></div></div>`;
+ if(m.kind==='voice')return q+`<div class="vn"><button class="pl" data-id="${m.id}" aria-label="চালান">${ic('play')}</button><div class="wv">${(m.wave||[]).map(h=>`<i style="height:${Math.round(h*100)}%"></i>`).join('')}</div><span class="du">${fmt(m.duration||0)}</span></div>`;
+ return q+E(m.body)}
+const bub=m=>`<div class="m ${m.sender_id===me.id?'me':'them'} ${m.deleted?'del':''}" data-mid="${m.id}">${body(m)}<div class="t">${tm(m.created_at)}${tk(m)}</div></div>`;
+const URLS={};async function url(p){if(URLS[p])return URLS[p];const{data}=await sb.storage.from('chat-files').createSignedUrl(p,3600);return URLS[p]=data&&data.signedUrl}
+async function hydrate(root){for(const e of root.querySelectorAll('img[data-path]:not([src])')){const u=await url(e.dataset.path);if(u)e.src=u}}
+function scr(i){const b=$('#msgs');if(i)b.style.scrollBehavior='auto';b.scrollTop=b.scrollHeight;b.style.scrollBehavior=''}
+function draw(){const b=$('#msgs');b.innerHTML='<div class="day">আজ</div>'+[...msgs.values()].map(bub).join('');hydrate(b);scr(1)}
+function add(m){const b=$('#msgs');b.insertAdjacentHTML('beforeend',bub(m));hydrate(b);scr()}
+function ticks(){document.querySelectorAll('#msgs .m.me').forEach(e=>{const m=msgs.get(+e.dataset.mid),t=e.querySelector('.tk');if(m&&t){t.innerHTML=ic(rd(m)?'checks':'check');t.classList.toggle('read',!!rd(m))}})}
+async function open(id){
+ cur=CH.find(c=>c.id===id)||{id,who:null};msgs=new Map();rp=null;$('#rp').classList.remove('show');
+ $('#cn').textContent=nm();$('#cs').textContent=cur.who?cur.who.animal:'';$('#cav').innerHTML=cur.who?av(cur.who.animal,38):'';$('#msgs').innerHTML='';$('#app').classList.add('open');
+ const{data}=await sb.from('messages').select('*').eq('chat_id',id).order('created_at',{ascending:true}).limit(300);
+ (data||[]).forEach(m=>msgs.set(m.id,m));draw();markRead()}
+function close(){stopAud();$('#app').classList.remove('open');cur=null;loadChats()}$('#back').onclick=close;
+function markRead(){if(!cur)return;sb.from('chat_members').update({last_read_at:new Date().toISOString()}).eq('chat_id',cur.id).eq('user_id',me.id).then(soonLoad)}
+function rt(){sb.channel('rt')
+ .on('postgres_changes',{event:'*',schema:'public',table:'messages'},p=>{const m=p.new;if(!m||!m.id)return;
+  if(cur&&m.chat_id===cur.id){const had=msgs.has(m.id);msgs.set(m.id,m);if(had){const e=$(`[data-mid="${m.id}"]`);if(e){e.outerHTML=bub(m);hydrate($('#msgs'))}}else add(m);if(m.sender_id!==me.id)markRead()}soonLoad()})
+ .on('postgres_changes',{event:'UPDATE',schema:'public',table:'chat_members'},p=>{if(cur&&p.new.chat_id===cur.id&&p.new.user_id!==me.id){cur.theirRead=p.new.last_read_at;ticks()}})
+ .subscribe()}
+async function send(row){if(!cur)return;
+ const{data,error}=await sb.from('messages').insert({chat_id:cur.id,reply_to:rp?rp.id:null,...row}).select().single();
+ if(error)return toast('পাঠানো যায়নি');cancelRp();if(!msgs.has(data.id)){msgs.set(data.id,data);add(data)}soonLoad()}
+function sendText(){const v=$('#in').value.trim();if(!v)return;$('#in').value='';$('#bar').classList.remove('has');send({kind:'text',body:v})}
+$('#send').onclick=sendText;$('#in').onkeydown=e=>{if(e.key==='Enter')sendText()};$('#in').oninput=e=>$('#bar').classList.toggle('has',!!e.target.value.trim());
+function cancelRp(){rp=null;$('#rp').classList.remove('show')}$('#rpx').onclick=cancelRp;
+/* files */
+async function shrink(f){if(!/^image\/(jpeg|png|webp)$/.test(f.type))return f;try{const b=await createImageBitmap(f),k=Math.min(1,1600/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=b.width*k;c.height=b.height*k;c.getContext('2d').drawImage(b,0,0,c.width,c.height);
+ return await new Promise(r=>c.toBlob(x=>r(x&&x.size<f.size?new File([x],f.name.replace(/\.\w+$/,'.jpg'),{type:'image/jpeg'}):f),'image/jpeg',.82))}catch(e){return f}}
+async function upload(blob,name,type){const ext=((name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin').slice(0,8),path=`${cur.id}/${crypto.randomUUID()}.${ext}`;
+ const{error}=await sb.storage.from('chat-files').upload(path,blob,{contentType:type||'application/octet-stream'});if(error){toast('আপলোড ব্যর্থ হয়েছে');return null}return path}
+async function pick(f){if(!f||!cur)return;if(f.size>25*1048576)return toast('ফাইল ২৫ MB এর বেশি হতে পারবে না');toast('আপলোড হচ্ছে…');
+ const isImg=f.type.startsWith('image/');if(isImg)f=await shrink(f);const path=await upload(f,f.name,f.type);if(path)send({kind:isImg?'image':'file',file_path:path,file_name:f.name,file_size:f.size})}
+for(const id of['fph','fdoc'])$('#'+id).onchange=e=>{pick(e.target.files[0]);e.target.value=''};
+$('#att').onclick=()=>sheet(`<div class="grid"><button data-k="fph">${ic('image')}ছবি</button><button data-k="fdoc">${ic('file')}ডকুমেন্ট</button></div>`);
+/* voice */
+async function startRec(){
+ if(!navigator.mediaDevices||!window.MediaRecorder)return toast('এই ব্রাউজারে ভয়েস রেকর্ড চলবে না');
+ try{const st=await navigator.mediaDevices.getUserMedia({audio:true}),ac=new(window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser();an.fftSize=256;ac.createMediaStreamSource(st).connect(an);
+  const mr=new MediaRecorder(st),ch=[],lv=[],buf=new Uint8Array(an.fftSize),t0=Date.now();mr.ondataavailable=e=>ch.push(e.data);mr.start();
+  const iv=setInterval(()=>{an.getByteTimeDomainData(buf);let x=0;for(const v of buf)x=Math.max(x,Math.abs(v-128));lv.push(x/128);$('#rt').textContent=fmt((Date.now()-t0)/1000)},100);
+  rec={mr,st,ac,ch,lv,iv,t0};$('#bar').classList.add('rec')}catch(e){toast('মাইক্রোফোনের অনুমতি দিন')}}
+function stopRec(go){if(!rec)return;const r=rec;rec=null;clearInterval(r.iv);$('#bar').classList.remove('rec');
+ r.mr.onstop=async()=>{r.st.getTracks().forEach(t=>t.stop());r.ac.close();if(!go)return;
+  const dur=(Date.now()-r.t0)/1000;if(dur<.8)return toast('আরেকটু সময় ধরে বলুন');
+  const n=32,mx=Math.max(.05,...r.lv),wave=[];for(let i=0;i<n;i++){const a=r.lv.slice(Math.floor(i*r.lv.length/n),Math.floor((i+1)*r.lv.length/n)+1);wave.push(Math.max(.12,Math.max(0,...a)/mx))}
+  const type=(r.mr.mimeType||'audio/webm').split(';')[0],path=await upload(new Blob(r.ch,{type}),'v.'+(type.includes('mp4')?'m4a':'webm'),type);
+  if(path)send({kind:'voice',file_path:path,duration:dur,wave})};r.mr.stop()}
+$('#mic').onclick=startRec;$('#rs').onclick=()=>stopRec(1);$('#rc').onclick=()=>stopRec(0);
+function stopAud(){if(aud){aud.pause();aud=null}if(aid){const e=$(`[data-mid="${aid}"]`),m=msgs.get(aid);if(e&&m)resetV(e,m);aid=null}}
+function resetV(e,m){e.querySelector('.pl').innerHTML=ic('play');e.querySelectorAll('.wv i').forEach(i=>i.classList.remove('on'));e.querySelector('.du').textContent=fmt(m.duration||0)}
+async function play(id){const m=msgs.get(+id);if(aid==m.id)return stopAud();stopAud();const u=await url(m.file_path);if(!u)return toast('অডিও পাওয়া যায়নি');
+ const e=$(`[data-mid="${m.id}"]`),bars=e.querySelectorAll('.wv i');aud=new Audio(u);aid=m.id;e.querySelector('.pl').innerHTML=ic('pause');
+ aud.ontimeupdate=()=>{const d=isFinite(aud.duration)?aud.duration:m.duration,p=aud.currentTime/d;bars.forEach((b,i)=>b.classList.toggle('on',i<p*bars.length));e.querySelector('.du').textContent=fmt(aud.currentTime)};
+ aud.onended=()=>{resetV(e,m);aud=null;aid=null};aud.play().catch(()=>{toast('চালানো যায়নি');stopAud()})}
+/* message actions */
+$('#msgs').onclick=async e=>{
+ const p=e.target.closest('.pl');if(p)return play(p.dataset.id);
+ const im=e.target.closest('.pic');if(im&&im.src){$('#lb img').src=im.src;return $('#lb').classList.add('show')}
+ const f=e.target.closest('.file');if(f){const u=await url(f.dataset.path);return u&&window.open(u,'_blank')}
+ const b=e.target.closest('.m');if(!b)return;const m=msgs.get(+b.dataset.mid);if(!m||m.deleted)return;
+ sheet(`<button class="act" data-a="reply" data-id="${m.id}">${ic('reply')}রিপ্লাই</button>${m.sender_id===me.id?`<button class="act red" data-a="del" data-id="${m.id}">${ic('trash')}সবার জন্য মুছুন</button>`:''}`)};
+$('#lb').onclick=()=>$('#lb').classList.remove('show');
+$('#sheet').onclick=async e=>{
+ if(e.target.classList.contains('bk'))return sheet(null);
+ const k=e.target.closest('[data-k]');if(k){sheet(null);return $('#'+k.dataset.k).click()}
+ const pp=e.target.closest('[data-p]');if(pp){sheet(null);return push(pp.dataset.p)}
+ const a=e.target.closest('[data-a]');if(!a)return;const m=msgs.get(+a.dataset.id);sheet(null);
+ if(a.dataset.a==='reply'){rp={id:m.id};$('#rpn').textContent=m.sender_id===me.id?'আপনি':nm();$('#rpt').textContent=pv(m);$('#rp').classList.add('show');$('#in').focus()}
+ if(a.dataset.a==='del'){const{error}=await sb.from('messages').update({deleted:true,body:null}).eq('id',m.id);if(error)toast('মোছা যায়নি')}};
+viaUI();hero();
+</script>
+</body>
+</html>
